@@ -10,4 +10,5 @@ public interface FileRepository extends JpaRepository<File, Long> {
     Page<File> findByUser(User user, Pageable pageable);
     Optional<File> findByUserAndFilename(User user, String filename);
     boolean existsByUserAndFilename(User user, String newFilename);
+
 }
