@@ -21,13 +21,13 @@
 | Слой           | Классы |
 |----------------|--------|
 | Controller     | AuthController, FileController |
-| Service        | AuthService, FileService |
+| Service        | AuthService, FileService, UserDetailsServiceImpl |
 | Repository     | UserRepository, FileRepository |
 | Entity         | User, File |
 | DTO            | LoginRequest, LoginResponse, FileResponse, RenameFileRequest, ErrorResponse |
 | Security       | JwtFilter |
-| Exception      | GlobalExceptionHandler, CorsException, StorageException, FileProcessingException, InvalidTokenException, UserAlreadyExistsException |
-| Config         | MultipartConfig, WebConfig, SecurityConfig |
+| Exception      | GlobalExceptionHandler, CorsException, StorageException, FileProcessingException, InvalidTokenException, UserAlreadyExistsException, UserNotFoundException |
+| Config         | MultipartConfig, CorsProperties, SecurityConfig |
 | Util           | JwtTokenUtil |
 
 ## Хранение файлов
@@ -48,3 +48,23 @@
 ## Хранение файлов
 
 Файлы хранятся в локальной файловой системе. Путь задается в файле настроек `application-test.yml`.
+
+
+### Стек технологий
+| Категория | Технология |
+|----------------|--------|
+|  Backend | Spring Boot (Java 17) |
+| База данных | PostgreSQL |
+| Безопасность | Spring Security + JWT |
+| Файловое хранилище | Локальная файловая система |
+| Валидация | Hibernate Validator |
+| Логгирование | Log4j2 |
+| Тестирование | JUnit 5, Mockito, Testcontainers
+| Сборка | Maven |
+| Формат API | JSON |
+
+### Запуск через Docker Compose
+```
+docker-compose -f docker-compose.yml up --build
+```
+
