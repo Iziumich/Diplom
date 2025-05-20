@@ -12,7 +12,6 @@ import ru.netology.cloudservice.service.AuthService;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:8081", allowCredentials = "true")
 public class AuthController {
     private final AuthService authService;
     @PostMapping("/login")

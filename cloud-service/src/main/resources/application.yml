@@ -51,9 +51,22 @@ file:
   storage-path: ${UPLOAD_DIR:/app/uploads}
 
 cors:
-  allowed-origins: "http://localhost:8081"
-  allowed-methods: "GET, POST, PUT, DELETE, OPTIONS"
-  allowed-headers: "auth-token, Content-Type"
+  path-pattern: "/cloud/**"
+  allowed-origins:
+    - "http://localhost:8081"
+  allowed-methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  allowed-headers:
+    - "Content-Type"
+    - "Authorization"
+    - "auth-token"
+  exposed-headers:
+    - "Authorization"
+    - "auth-token"
   allow-credentials: true
   max-age: 3600
 

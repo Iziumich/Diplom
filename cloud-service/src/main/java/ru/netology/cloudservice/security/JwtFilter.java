@@ -1,4 +1,5 @@
 package ru.netology.cloudservice.security;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.netology.cloudservice.config.WebConfig;
-import ru.netology.cloudservice.exception.CorsException;
 import ru.netology.cloudservice.util.JwtTokenUtil;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,7 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
@@ -31,25 +33,17 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain chain)
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
-        String origin = request.getHeader("Origin");
-        try {
-            WebConfig webConfig = new WebConfig();
-            webConfig.validateOrigin(origin);
-        } catch (CorsException e) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-            return;
-        }
-
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            chain.doFilter(request, response);
+            log.info("OPTIONS request bypassed");
+            filterChain.doFilter(request, response);
             return;
         }
 
         String authHeader = request.getHeader("auth-token");
-        if (authHeader == null) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             authHeader = request.getHeader("Authorization");
         }
 
@@ -60,19 +54,23 @@ public class JwtFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
             try {
                 username = jwtTokenUtil.getEmailFromToken(jwt);
+                log.info("Successfully parsed JWT token for user: {}", username);
             } catch (ExpiredJwtException e) {
-                logger.warn("JWT token is expired: " + e.getMessage());
+                log.warn("JWT token expired: {}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
                 return;
             } catch (JwtException e) {
-                logger.warn("Invalid JWT token: " + e.getMessage());
+                log.warn("Invalid JWT token: {}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
                 return;
             }
+        } else {
+            log.debug("No valid auth token found in headers");
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -81,8 +79,10 @@ public class JwtFilter extends OncePerRequestFilter {
                     );
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            log.info("Authentication set for user: {}", username);
         }
 
-        chain.doFilter(request, response);
+        log.debug("Passing request to next filter in chain");
+        filterChain.doFilter(request, response);
     }
 }

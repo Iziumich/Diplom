@@ -12,7 +12,7 @@ class JwtTokenUtilTest {
     private JwtTokenUtil jwtTokenUtil;
     private static final String SECRET_KEY = "your-secret-key-which-should-be-long-enough-to-pass-validation";
     private static final String EMAIL = "test@example.com";
-    private static final long EXPIRATION = 3600000L; // 1 hour
+    private static final long EXPIRATION = 3600000L;
 
     @BeforeEach
     void setUp() {
